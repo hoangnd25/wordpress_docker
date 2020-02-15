@@ -6,6 +6,10 @@ on:
   push:
     branches:
       - master
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
   pull_request:
     branches:
       - master
@@ -15,10 +19,36 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    
+    env:
+      DOCKER_HUB_USERNAME: hoangnd
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build the nginx image
-      run: docker build . --file Dockerfile --target nginx --tag wordpress-nginx:$(date +%s)
-    - name: Build the php image
-      run: docker build . --file Dockerfile --target php --tag wordpress-php:$(date +%s)
+
+    - name: Log into registry
+      run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ DOCKER_HUB_USERNAME }} --password-stdin
+        
+    - name: Build image
+      run: |
+        PHP_IMAGE_ID=${{ DOCKER_HUB_USERNAME }}/wordpress-php
+        NGINX_IMAGE_ID=${{ DOCKER_HUB_USERNAME }}/wordpress-nginx
+
+        # Strip git ref prefix from version
+        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+        # Strip "v" prefix from tag name
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+        # Use Docker `latest` tag convention
+        [ "$VERSION" == "master" ] && VERSION=latest
+
+        echo PHP_IMAGE_ID=$PHP_IMAGE_ID
+        echo NGINX_IMAGE_ID=$NGINX_IMAGE_ID
+        echo VERSION=$VERSION
+
+        docker build . --file Dockerfile --target nginx --tag $NGINX_IMAGE_ID:$VERSION
+        docker build . --file Dockerfile --target php --tag $PHP_IMAGE_ID:$VERSION
+        docker push $NGINX_IMAGE_ID:$VERSION
+        docker push $PHP_IMAGE_ID:$VERSION
