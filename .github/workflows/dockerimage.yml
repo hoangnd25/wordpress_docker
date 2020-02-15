@@ -1,0 +1,24 @@
+name: Docker Image CI
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the master branch
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the nginx image
+      run: docker build . --file Dockerfile --target nginx --tag wordpress-nginx:$(date +%s)
+    - name: Build the php image
+      run: docker build . --file Dockerfile --target php --tag wordpress-php:$(date +%s)
