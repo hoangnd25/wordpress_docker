@@ -47,8 +47,13 @@ jobs:
         echo PHP_IMAGE_ID=$PHP_IMAGE_ID
         echo NGINX_IMAGE_ID=$NGINX_IMAGE_ID
         echo VERSION=$VERSION
+        
+        
+        docker image pull "$NGINX_IMAGE_ID:latest" || \
+        docker image pull "$NGINX_IMAGE_ID:latest" || \
+        true
 
-        docker build . --file Dockerfile --target nginx --tag $NGINX_IMAGE_ID:$VERSION
-        docker build . --file Dockerfile --target php --tag $PHP_IMAGE_ID:$VERSION
+        docker build . --file Dockerfile --target nginx --tag $NGINX_IMAGE_ID:$VERSION --cache-from $NGINX_IMAGE_ID:latest
+        docker build . --file Dockerfile --target php --tag $PHP_IMAGE_ID:$VERSION --cache-from $PHP_IMAGE_ID:latest
         docker push $NGINX_IMAGE_ID:$VERSION
         docker push $PHP_IMAGE_ID:$VERSION
