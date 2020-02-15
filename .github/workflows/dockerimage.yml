@@ -32,8 +32,8 @@ jobs:
         
     - name: Build image
       run: |
-        PHP_IMAGE_ID=${{ DOCKER_HUB_USERNAME }}/wordpress-php
-        NGINX_IMAGE_ID=${{ DOCKER_HUB_USERNAME }}/wordpress-nginx
+        PHP_IMAGE_ID=$DOCKER_HUB_USERNAME/wordpress-php
+        NGINX_IMAGE_ID=$DOCKER_HUB_USERNAME/wordpress-nginx
 
         # Strip git ref prefix from version
         VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
