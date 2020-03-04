@@ -3,7 +3,7 @@ ARG PHP_VERSION=7.4
 
 FROM nginx:${NGINX_VERSION}-alpine AS nginx
 
-ENV PHP_SERVICE=php PHP_PORT=9000
+ENV PHP_SERVICE=php PHP_PORT=9000 PHP_INI=docker/php/php.ini
 
 COPY docker/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.bak
 COPY docker/nginx/docker-entrypoint.sh /usr/local/bin/entrypoint
@@ -63,7 +63,7 @@ RUN set -eux; \
 	\
 	apk del .build-deps
 
-COPY docker/php/php.ini /usr/local/etc/php/php.ini
+COPY ${PHP_INI} /usr/local/etc/php/php.ini
 
 # copy composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

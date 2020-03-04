@@ -33,6 +33,7 @@ jobs:
     - name: Build image
       run: |
         PHP_IMAGE_ID=$DOCKER_HUB_USERNAME/wordpress-php
+        PHP_DEV_IMAGE_ID=$DOCKER_HUB_USERNAME/wordpress-php-dev
         NGINX_IMAGE_ID=$DOCKER_HUB_USERNAME/wordpress-nginx
 
         # Strip git ref prefix from version
@@ -45,15 +46,20 @@ jobs:
         [ "$VERSION" == "master" ] && VERSION=latest
 
         echo PHP_IMAGE_ID=$PHP_IMAGE_ID
+        echo PHP_DEV_IMAGE_ID=$PHP_DEV_IMAGE_ID
         echo NGINX_IMAGE_ID=$NGINX_IMAGE_ID
         echo VERSION=$VERSION
         
-        
+        # docker/php/php.ini
         docker image pull "$NGINX_IMAGE_ID:latest" || \
-        docker image pull "$NGINX_IMAGE_ID:latest" || \
+        docker image pull "$PHP_IMAGE_ID:latest" || \
+        docker image pull "$PHP_DEV_IMAGE_ID:latest" || \
         true
 
         docker build . --file Dockerfile --target nginx --tag $NGINX_IMAGE_ID:$VERSION --cache-from $NGINX_IMAGE_ID:latest
         docker build . --file Dockerfile --target php --tag $PHP_IMAGE_ID:$VERSION --cache-from $PHP_IMAGE_ID:latest
+        docker build . --file Dockerfile --target php --tag $PHP_DEV_IMAGE_ID:$VERSION --cache-from $PHP_DEV_IMAGE_ID:latest --build-arg PHP_INI="docker/php/php_dev.ini"
+
         docker push $NGINX_IMAGE_ID:$VERSION
         docker push $PHP_IMAGE_ID:$VERSION
+        docker push $PHP_DEV_IMAGE_ID:$VERSION
