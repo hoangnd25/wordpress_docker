@@ -36,7 +36,12 @@ RUN set -eux; \
         libxml2-dev \
 		libzip-dev \
 		zlib-dev \
+		freetype-dev \
+		libjpeg-turbo-dev \
+        libwebp-dev \
+		libpng-dev \
 	; \
+    docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp; \
 	\
 	docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) \
 		intl \
@@ -45,13 +50,11 @@ RUN set -eux; \
         mysqli \
 		pdo_mysql \
 		zip \
+		gd \
 	; \
 	docker-php-ext-enable \
 		opcache \
 	; \
-    docker-php-ext-configure gd --with-freetype --with-jpeg && \
-    docker-php-ext-install gd \
-    ; \
 	\
 	runDeps="$( \
 		scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions \
