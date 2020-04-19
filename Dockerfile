@@ -41,7 +41,9 @@ RUN set -eux; \
         libwebp-dev \
 		libpng-dev \
 	; \
-    docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg --with-webp; \
+    docker-php-ext-configure gd --with-gd --with-webp-dir --with-jpeg-dir \
+    --with-png-dir --with-zlib-dir --with-xpm-dir --with-freetype-dir \
+    --enable-gd-native-ttf; \
 	\
 	docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) \
 		intl \
